@@ -1,13 +1,18 @@
 package com.example.simple_news;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+
+import com.example.simple_news.utils.CacheUtils;
+import com.example.simple_news.view.GuideActivity;
 
 public class LauncherActivity extends AppCompatActivity {
     private RelativeLayout activity_launcher;
@@ -37,10 +42,37 @@ public class LauncherActivity extends AppCompatActivity {
         set.addAnimation(sa);
         set.setDuration(2000);
 
+        set.setAnimationListener(new MyAnimationListener());
+
         activity_launcher.startAnimation(set);
     }
 
     private void initViews() {
         activity_launcher = (RelativeLayout) findViewById(R.id.activity_launcher);
+    }
+
+    class MyAnimationListener implements Animation.AnimationListener{
+
+        @Override
+        public void onAnimationStart(Animation animation) {
+
+        }
+
+        @Override
+        public void onAnimationEnd(Animation animation) {
+            boolean isStartMain = CacheUtils.getBoolean(LauncherActivity.this,"start_main");
+            if(isStartMain){
+
+            }else{
+                Intent intent = new Intent(LauncherActivity.this,GuideActivity.class);
+                startActivity(intent);
+            }
+            finish();
+        }
+
+        @Override
+        public void onAnimationRepeat(Animation animation) {
+
+        }
     }
 }
