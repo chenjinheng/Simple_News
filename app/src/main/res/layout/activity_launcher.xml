@@ -4,8 +4,13 @@
     android:id="@+id/activity_launcher"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/ic_launcher"
-    tools:context="com.example.simple_news.LauncherActivity">
 
+    android:background="@drawable/splash_bg_newyear"
+    tools:context="com.example.simple_news.LauncherActivity">
+<ImageView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:src="@drawable/splash_sheep_newyear"
+    />
 
 </RelativeLayout>

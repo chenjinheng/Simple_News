@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 
 import com.example.simple_news.utils.CacheUtils;
 import com.example.simple_news.view.GuideActivity;
+import com.example.simple_news.view.MainActivity;
 
 public class LauncherActivity extends AppCompatActivity {
     private RelativeLayout activity_launcher;
@@ -61,12 +62,15 @@ public class LauncherActivity extends AppCompatActivity {
         @Override
         public void onAnimationEnd(Animation animation) {
             boolean isStartMain = CacheUtils.getBoolean(LauncherActivity.this,"start_main");
+            Intent intent;
             if(isStartMain){
+                intent = new Intent(LauncherActivity.this,MainActivity.class);
 
             }else{
-                Intent intent = new Intent(LauncherActivity.this,GuideActivity.class);
-                startActivity(intent);
+                intent = new Intent(LauncherActivity.this,GuideActivity.class);
+
             }
+            startActivity(intent);
             finish();
         }
 
