@@ -8,12 +8,11 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.example.simple_news.utils.CacheUtils;
-import com.example.simple_news.view.GuideActivity;
-import com.example.simple_news.view.MainActivity;
+import com.example.simple_news.activity.GuideActivity;
+import com.example.simple_news.activity.MainActivity;
 
 public class LauncherActivity extends AppCompatActivity {
     private RelativeLayout activity_launcher;

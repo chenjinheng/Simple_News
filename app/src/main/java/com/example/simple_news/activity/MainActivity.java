@@ -1,8 +1,7 @@
-package com.example.simple_news.view;
+package com.example.simple_news.activity;
 
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.example.simple_news.R;
@@ -22,6 +21,12 @@ public class MainActivity extends SlidingFragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initSlidingMenu();
+
+        initFragment();
+    }
+
+    private void initSlidingMenu() {
         setBehindContentView(R.layout.activity_leftmenu);
 
         SlidingMenu slidingMenu = getSlidingMenu();
@@ -32,8 +37,6 @@ public class MainActivity extends SlidingFragmentActivity {
         slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
 
         slidingMenu.setBehindOffset(DensityUtil.dip2px(MainActivity.this,200));
-
-        initFragment();
     }
 
     private void initFragment() {

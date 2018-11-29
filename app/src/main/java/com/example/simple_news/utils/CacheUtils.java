@@ -1,11 +1,7 @@
 package com.example.simple_news.utils;
 
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.SharedPreferences;
-
-import com.example.simple_news.LauncherActivity;
-import com.example.simple_news.view.GuideActivity;
 
 /**
  * Created by 陈金桁 on 2018/11/28.
