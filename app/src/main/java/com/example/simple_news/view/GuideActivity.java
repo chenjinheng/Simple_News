@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 
 import com.example.simple_news.R;
 import com.example.simple_news.utils.CacheUtils;
+import com.example.simple_news.utils.DensityUtil;
 
 import java.util.ArrayList;
 
@@ -25,6 +26,8 @@ public class GuideActivity extends AppCompatActivity {
     private Button btn_start_main;
     private LinearLayout ll_point_group;
     private ImageView iv_red_point;
+
+    private int widthdpi;
 
     private ArrayList<ImageView> imageViews;
     private int leftmax;
@@ -61,6 +64,9 @@ public class GuideActivity extends AppCompatActivity {
                 R.drawable.guide_2,
                 R.drawable.guide_3
         };
+        widthdpi = DensityUtil.dip2px(this,10);
+
+
 
         for(int i = 0;i < ids.length;i++){
             ImageView imageView = new ImageView(this);
@@ -71,10 +77,10 @@ public class GuideActivity extends AppCompatActivity {
 
             point.setBackgroundResource(R.drawable.point_normal);
 
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(36,36);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(widthdpi,widthdpi);
             point.setLayoutParams(params);
             if(i != 0){
-                params.leftMargin = 10;
+                params.leftMargin = widthdpi;
             }
 
             ll_point_group.addView(point);
