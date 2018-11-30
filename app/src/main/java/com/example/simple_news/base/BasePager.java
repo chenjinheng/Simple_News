@@ -7,6 +7,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.example.simple_news.R;
+import com.example.simple_news.activity.MainActivity;
 
 /**
  * Created by 陈金桁 on 2018/11/29.
@@ -33,6 +34,13 @@ public class BasePager {
         ib_menu = (ImageButton) view.findViewById(R.id.ib_menu);
         fl_content = (FrameLayout) view.findViewById(R.id.fl_content);
 
+        ib_menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity mainActivity = (MainActivity) context;
+                mainActivity.getSlidingMenu().toggle();
+            }
+        });
         return view;
     }
 
