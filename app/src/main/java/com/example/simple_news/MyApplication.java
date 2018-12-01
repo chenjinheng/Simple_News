@@ -12,5 +12,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        x.Ext.setDebug(true);
+        x.Ext.init(this);
     }
 }

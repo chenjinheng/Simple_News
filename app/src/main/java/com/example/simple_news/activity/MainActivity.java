@@ -3,6 +3,7 @@ package com.example.simple_news.activity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
+import android.view.Window;
 
 import com.example.simple_news.R;
 import com.example.simple_news.fragment.ContentFragment;
@@ -18,6 +19,7 @@ public class MainActivity extends SlidingFragmentActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 

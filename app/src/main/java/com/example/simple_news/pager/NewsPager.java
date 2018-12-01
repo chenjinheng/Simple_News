@@ -31,6 +31,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -69,25 +70,35 @@ public class NewsPager extends BasePager {
         }else{
             getDataFromNet();
         }
+
     }
 
     private void getDataFromNet() {
-        responseData = OkhttpUtil.getResponseData(Constants.news_center_url);
-        handler.sendEmptyMessage(PROCESS_JSON);
+        RequestParams params = new RequestParams(Constants.news_center_url);
+        x.http().get(params, new Callback.CommonCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                processData(result);
+                CacheUtils.putString(context,Constants.news_center_url,result);
+            }
+
+            @Override
+            public void onError(Throwable ex, boolean isOnCallback) {
+
+            }
+
+            @Override
+            public void onCancelled(CancelledException cex) {
+
+            }
+
+            @Override
+            public void onFinished() {
+
+            }
+        });
     }
 
-    private Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what){
-                case PROCESS_JSON:
-                    CacheUtils.putString(context,Constants.news_center_url,responseData);
-                    processData(responseData);
-                    break;
-            }
-        }
-    };
     private void processData(String result) {
         NewsBean bean = parsedJson(result);
 
@@ -99,7 +110,7 @@ public class NewsPager extends BasePager {
 
         detaiBasePagers = new ArrayList<>();
 
-        detaiBasePagers.add(new NewsMenuDetailPager(context));
+        detaiBasePagers.add(new NewsMenuDetailPager(context,data.get(0)));
         detaiBasePagers.add(new TopicMenuDetailPager((context)));
         detaiBasePagers.add(new PhotosMenuDetailPager(context));
         detaiBasePagers.add(new interacMenuDetailPager(context));
@@ -122,8 +133,8 @@ public class NewsPager extends BasePager {
 
         MenuDetaiBasePager menuDetaiBasePager = detaiBasePagers.get(position);
         View rootView = menuDetaiBasePager.rootView;
-        menuDetaiBasePager.initData();
         fl_content.addView(rootView);
+        menuDetaiBasePager.initData();
 
     }
 }

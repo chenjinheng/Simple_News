@@ -1,1 +1,2 @@
 include ':app', ':SlidingMenu_library', ':sample', ':xutils'
+include ':indicator_library'
