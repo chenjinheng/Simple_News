@@ -1,9 +1,11 @@
 package com.example.simple_news.menupager;
 
 import android.content.Context;
+import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.simple_news.R;
 import com.example.simple_news.base.MenuDetaiBasePager;
 
 /**
@@ -11,7 +13,8 @@ import com.example.simple_news.base.MenuDetaiBasePager;
  */
 
 public class NewsMenuDetailPager  extends MenuDetaiBasePager{
-    private TextView textView;
+
+    private ViewPager viewPager;
 
     public NewsMenuDetailPager(Context context) {
         super(context);
@@ -19,13 +22,14 @@ public class NewsMenuDetailPager  extends MenuDetaiBasePager{
 
     @Override
     public View initView() {
-        textView = new TextView(context);
-        return textView;
+        View view = View.inflate(context, R.layout.newsmenu_detail_pager,null);
+        viewPager = (ViewPager) view.findViewById(R.id.viewpager);
+        return view;
     }
 
     @Override
     public void initData() {
         super.initData();
-        textView.setText("新闻详情");
+
     }
 }

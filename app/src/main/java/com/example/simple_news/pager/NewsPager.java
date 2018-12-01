@@ -1,6 +1,9 @@
 package com.example.simple_news.pager;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -14,7 +17,9 @@ import com.example.simple_news.menupager.NewsMenuDetailPager;
 import com.example.simple_news.menupager.PhotosMenuDetailPager;
 import com.example.simple_news.menupager.TopicMenuDetailPager;
 import com.example.simple_news.menupager.interacMenuDetailPager;
+import com.example.simple_news.utils.CacheUtils;
 import com.example.simple_news.utils.Constants;
+import com.example.simple_news.utils.OkhttpUtil;
 import com.google.gson.Gson;
 
 import org.xutils.common.Callback;
@@ -39,6 +44,8 @@ public class NewsPager extends BasePager {
     private List<NewsBean.DataBean> data;
 
     private ArrayList<MenuDetaiBasePager> detaiBasePagers;
+    private final int PROCESS_JSON = 1;
+    private String responseData;
 
     public NewsPager(Context context) {
         super(context);
@@ -55,52 +62,32 @@ public class NewsPager extends BasePager {
 
         ib_menu.setVisibility(View.VISIBLE);
 
-        getDataFromNet();
+        String saveJson = CacheUtils.getString(context,Constants.news_center_url);
+
+        if (!TextUtils.isEmpty(saveJson)) {
+            processData(saveJson);
+        }else{
+            getDataFromNet();
+        }
     }
 
     private void getDataFromNet() {
-        RequestParams params = new RequestParams(Constants.news_center_url);
-        x.http().get(params, new Callback.CommonCallback<String>() {
-            @Override
-            public void onSuccess(String result) {
-                Log.e("TAG",result);
-                processData(result);
-            }
-
-            @Override
-            public void onError(Throwable ex, boolean isOnCallback) {
-                Log.e("tag",ex.getMessage());
-            }
-
-            @Override
-            public void onCancelled(CancelledException cex) {
-
-            }
-
-            @Override
-            public void onFinished() {
-
-            }
-        });
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                OkHttpClient okHttpClient = new OkHttpClient();
-//                Request request = new Request.Builder()
-//                        .url(Constants.news_center_url)
-//                        .build();
-//                try {
-//                    Response response = okHttpClient.newCall(request).execute();
-//                    String responseData = response.body().string();
-//                    Log.e("TAG",responseData.toString());
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//
-//            }
-//        }).start();
+        responseData = OkhttpUtil.getResponseData(Constants.news_center_url);
+        handler.sendEmptyMessage(PROCESS_JSON);
     }
 
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case PROCESS_JSON:
+                    CacheUtils.putString(context,Constants.news_center_url,responseData);
+                    processData(responseData);
+                    break;
+            }
+        }
+    };
     private void processData(String result) {
         NewsBean bean = parsedJson(result);
 
