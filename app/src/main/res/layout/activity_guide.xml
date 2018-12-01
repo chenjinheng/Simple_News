@@ -18,6 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="进入应用"
+        android:visibility="gone"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:textColor="@drawable/btn_start_main_textcolor_selector"

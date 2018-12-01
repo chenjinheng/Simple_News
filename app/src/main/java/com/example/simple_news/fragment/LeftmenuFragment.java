@@ -16,6 +16,7 @@ import com.example.simple_news.R;
 import com.example.simple_news.activity.MainActivity;
 import com.example.simple_news.base.BaseFragment;
 import com.example.simple_news.domain.NewsBean;
+import com.example.simple_news.pager.NewsPager;
 import com.example.simple_news.utils.DensityUtil;
 
 import java.util.List;
@@ -48,12 +49,21 @@ public class LeftmenuFragment extends BaseFragment {
                 prePosition = position;
                 leftmenuFragmentAdapter.notifyDataSetChanged();
 
-                MainActivity mainActivity = (MainActivity) context;
-                mainActivity.getSlidingMenu().toggle();
+
+
+                switcager(prePosition);
             }
         });
 
         return listView;
+    }
+
+    private void switcager(int position) {
+        MainActivity mainActivity = (MainActivity) context;
+        mainActivity.getSlidingMenu().toggle();
+        ContentFragment contentFragment = mainActivity.getContentFragment();
+        NewsPager newsPager = contentFragment.getNewsPager();
+        newsPager.swichPager(position);
     }
 
     @Override
@@ -65,9 +75,7 @@ public class LeftmenuFragment extends BaseFragment {
     public void setData(List<NewsBean.DataBean> data) {
         this.data = data;
 
-        for(int i = 0;i < data.size();i++){
-
-        }
+        switcager(prePosition);
 
         listView.setAdapter(leftmenuFragmentAdapter);
     }

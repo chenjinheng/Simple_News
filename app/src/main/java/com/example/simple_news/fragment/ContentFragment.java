@@ -65,6 +65,11 @@ public class ContentFragment extends BaseFragment {
 
         rg_main.setOnCheckedChangeListener(new MyCheckedChangeListener());
     }
+
+    public NewsPager getNewsPager() {
+        return (NewsPager) basePagers.get(1);
+    }
+
     class MyOnPagerChangeListener implements ViewPager.OnPageChangeListener{
 
         @Override
