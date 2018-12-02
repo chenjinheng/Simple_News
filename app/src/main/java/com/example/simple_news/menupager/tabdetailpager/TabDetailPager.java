@@ -9,21 +9,26 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.simple_news.R;
 import com.example.simple_news.base.MenuDetaiBasePager;
 import com.example.simple_news.domain.NewsBean;
 import com.example.simple_news.domain.TabDetailBean;
 import com.example.simple_news.utils.CacheUtils;
 import com.example.simple_news.utils.Constants;
+import com.example.simple_news.utils.DensityUtil;
 import com.google.gson.Gson;
 
 import org.xutils.common.Callback;
 import org.xutils.http.RequestParams;
+import org.xutils.image.ImageOptions;
 import org.xutils.x;
 
 import java.net.URL;
@@ -38,17 +43,27 @@ public class TabDetailPager extends MenuDetaiBasePager {
     private TextView iv_title;
     private LinearLayout ll_point_group;
     private ListView listView;
+    private MyTabDetailListAdapter adapter;
+    private ImageOptions imageOptions;
 
 
     private NewsBean.DataBean.ChildrenBean childrenBean;
 
     private String url;
     private List<TabDetailBean.DataBean.NewsBean> topnews;
+    private List<TabDetailBean.DataBean.NewsBean> news;
 
     public TabDetailPager(Context context,NewsBean.DataBean.ChildrenBean childrenBean) {
         super(context);
         this.childrenBean = childrenBean;
-
+        imageOptions = new ImageOptions.Builder()
+                .setSize(org.xutils.common.util.DensityUtil.dip2px(100), org.xutils.common.util.DensityUtil.dip2px(100))
+                .setRadius(org.xutils.common.util.DensityUtil.dip2px(5))
+                .setCrop(true)
+                .setImageScaleType(ImageView.ScaleType.CENTER_CROP)
+                .setLoadingDrawableId(R.drawable.news_pic_default)
+                .setFailureDrawableId(R.drawable.news_pic_default)
+                .build();
     }
 
 
@@ -67,10 +82,118 @@ public class TabDetailPager extends MenuDetaiBasePager {
         TabDetailBean tabDetailBean = parsedJson(saveJson);
         topnews = tabDetailBean.getData().getNews();
 
-        Log.e("AAG",topnews.get(0).getTitle());
-
         viewPager.setAdapter(new MyTabPagerAdaper());
+
+        ll_point_group.removeAllViews();
+
+        for(int i = 0;i < topnews.size();i++){
+            ImageView imageView = new ImageView(context);
+            imageView.setBackgroundResource(R.drawable.point_selector);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(DensityUtil.dip2px(context,8),DensityUtil.dip2px(context,8));
+
+            if(i == 0){
+                imageView.setEnabled(true);
+            }else{
+                imageView.setEnabled(false);
+                params.leftMargin = DensityUtil.dip2px(context,8);
+            }
+
+            imageView.setLayoutParams(params);
+            ll_point_group.addView(imageView);
+
+        }
+        iv_title.setText(topnews.get(prePosition).getTitle());
+        viewPager.addOnPageChangeListener(new MyOnPageChangeListener());
+
+        news = tabDetailBean.getData().getNews();
+
+        adapter = new MyTabDetailListAdapter();
+
+        listView.setAdapter(adapter);
+
     }
+    class MyTabDetailListAdapter extends BaseAdapter{
+
+        @Override
+        public int getCount() {
+            return news.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+            if(convertView == null){
+                convertView = View.inflate(context,R.layout.item_tabletail_pager,null);
+                viewHolder = new ViewHolder();
+                viewHolder.iv_icon = (ImageView) convertView.findViewById(R.id.iv_icon);
+                viewHolder.tv_title = (TextView) convertView.findViewById(R.id.tv_title);
+                viewHolder.tv_time = (TextView) convertView.findViewById(R.id.tv_time);
+
+                convertView.setTag(viewHolder);
+            }else{
+               viewHolder = (ViewHolder) convertView.getTag();
+            }
+
+            TabDetailBean.DataBean.NewsBean newsBean = news.get(position);
+            String imageUrl = Constants.Net + newsBean.getListimage();
+
+            Glide.with(context)
+                    .load(imageUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(viewHolder.iv_icon);
+
+//            x.image().bind(viewHolder.iv_icon,imageUrl,imageOptions);
+
+
+
+            viewHolder.tv_title.setText(newsBean.getTitle());
+            viewHolder.tv_time.setText(newsBean.getPubdate());
+
+            return convertView;
+        }
+    }
+    static class ViewHolder{
+        ImageView iv_icon;
+        TextView tv_title;
+        TextView tv_time;
+    }
+    private int prePosition;
+
+    class MyOnPageChangeListener implements ViewPager.OnPageChangeListener{
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            iv_title.setText(topnews.get(position).getTitle());
+            ll_point_group.getChildAt(prePosition).setEnabled(false);
+
+            ll_point_group.getChildAt(position).setEnabled(true);
+
+            prePosition = position;
+
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
+        }
+    }
+
     class MyTabPagerAdaper extends PagerAdapter{
 
         @Override
@@ -111,7 +234,6 @@ public class TabDetailPager extends MenuDetaiBasePager {
             @Override
             public void onSuccess(String result) {
                 CacheUtils.putString(context,url,result);
-                Log.e("onSuccess",result);
                 processData(result);
             }
 
@@ -135,10 +257,15 @@ public class TabDetailPager extends MenuDetaiBasePager {
     @Override
     public View initView() {
         View view = View.inflate(context, R.layout.tabdetail_pager,null);
-        viewPager = (ViewPager) view.findViewById(R.id.viewpager);
-        ll_point_group = (LinearLayout) view.findViewById(R.id.ll_point_group);
-        iv_title = (TextView) view.findViewById(R.id.tv_title);
         listView = (ListView) view.findViewById(R.id.listview);
+
+        View topNewsView = View.inflate(context,R.layout.topnews,null);
+        ll_point_group = (LinearLayout) topNewsView.findViewById(R.id.ll_point_group);
+        viewPager = (ViewPager) topNewsView.findViewById(R.id.viewpager);
+        iv_title = (TextView) topNewsView.findViewById(R.id.tv_title);
+
+
+        listView.addHeaderView(topNewsView);
 
         return view;
     }
