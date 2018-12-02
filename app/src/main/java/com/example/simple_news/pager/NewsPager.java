@@ -45,8 +45,7 @@ public class NewsPager extends BasePager {
     private List<NewsBean.DataBean> data;
 
     private ArrayList<MenuDetaiBasePager> detaiBasePagers;
-    private final int PROCESS_JSON = 1;
-    private String responseData;
+
 
     public NewsPager(Context context) {
         super(context);

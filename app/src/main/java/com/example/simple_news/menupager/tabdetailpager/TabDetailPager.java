@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -24,6 +25,8 @@ import com.example.simple_news.domain.TabDetailBean;
 import com.example.simple_news.utils.CacheUtils;
 import com.example.simple_news.utils.Constants;
 import com.example.simple_news.utils.DensityUtil;
+import com.example.simple_news.view.HorizontalScrollViewPager;
+import com.example.simple_news.view.RefreshListView;
 import com.google.gson.Gson;
 
 import org.xutils.common.Callback;
@@ -39,12 +42,14 @@ import java.util.List;
  */
 
 public class TabDetailPager extends MenuDetaiBasePager {
-    private ViewPager viewPager;
+    private HorizontalScrollViewPager viewPager;
     private TextView iv_title;
     private LinearLayout ll_point_group;
-    private ListView listView;
+    private RefreshListView listView;
     private MyTabDetailListAdapter adapter;
     private ImageOptions imageOptions;
+
+    private String moreUrl;
 
 
     private NewsBean.DataBean.ChildrenBean childrenBean;
@@ -52,6 +57,9 @@ public class TabDetailPager extends MenuDetaiBasePager {
     private String url;
     private List<TabDetailBean.DataBean.NewsBean> topnews;
     private List<TabDetailBean.DataBean.NewsBean> news;
+    private List<TabDetailBean.DataBean.NewsBean> moreNews;
+
+    private boolean isLoadMore = false;
 
     public TabDetailPager(Context context,NewsBean.DataBean.ChildrenBean childrenBean) {
         super(context);
@@ -80,37 +88,52 @@ public class TabDetailPager extends MenuDetaiBasePager {
 
     private void processData(String saveJson) {
         TabDetailBean tabDetailBean = parsedJson(saveJson);
-        topnews = tabDetailBean.getData().getNews();
 
-        viewPager.setAdapter(new MyTabPagerAdaper());
-
-        ll_point_group.removeAllViews();
-
-        for(int i = 0;i < topnews.size();i++){
-            ImageView imageView = new ImageView(context);
-            imageView.setBackgroundResource(R.drawable.point_selector);
-
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(DensityUtil.dip2px(context,8),DensityUtil.dip2px(context,8));
-
-            if(i == 0){
-                imageView.setEnabled(true);
-            }else{
-                imageView.setEnabled(false);
-                params.leftMargin = DensityUtil.dip2px(context,8);
-            }
-
-            imageView.setLayoutParams(params);
-            ll_point_group.addView(imageView);
-
+        moreUrl = "";
+        if(TextUtils.isEmpty(tabDetailBean.getData().getMore())){
+            moreUrl = "";
+        }else{
+            moreUrl = Constants.Net + tabDetailBean.getData().getMore();
         }
-        iv_title.setText(topnews.get(prePosition).getTitle());
-        viewPager.addOnPageChangeListener(new MyOnPageChangeListener());
 
-        news = tabDetailBean.getData().getNews();
+        if(!isLoadMore){
+            topnews = tabDetailBean.getData().getNews();
 
-        adapter = new MyTabDetailListAdapter();
+            viewPager.setAdapter(new MyTabPagerAdaper());
 
-        listView.setAdapter(adapter);
+            ll_point_group.removeAllViews();
+
+            for(int i = 0;i < topnews.size();i++){
+                ImageView imageView = new ImageView(context);
+                imageView.setBackgroundResource(R.drawable.point_selector);
+
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(DensityUtil.dip2px(context,8),DensityUtil.dip2px(context,8));
+
+                if(i == 0){
+                    imageView.setEnabled(true);
+                }else{
+                    imageView.setEnabled(false);
+                    params.leftMargin = DensityUtil.dip2px(context,8);
+                }
+
+                imageView.setLayoutParams(params);
+                ll_point_group.addView(imageView);
+
+            }
+            iv_title.setText(topnews.get(prePosition).getTitle());
+            viewPager.addOnPageChangeListener(new MyOnPageChangeListener());
+
+            news = tabDetailBean.getData().getNews();
+            adapter = new MyTabDetailListAdapter();
+            listView.setAdapter(adapter);
+        }else{
+            isLoadMore = false;
+             moreNews = tabDetailBean.getData().getNews();
+            news.addAll(moreNews);
+
+            adapter.notifyDataSetChanged();
+        }
+
 
     }
     class MyTabDetailListAdapter extends BaseAdapter{
@@ -150,6 +173,8 @@ public class TabDetailPager extends MenuDetaiBasePager {
 
             Glide.with(context)
                     .load(imageUrl)
+                    .placeholder(R.drawable.news_pic_default)
+                    .error(R.drawable.news_pic_default)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(viewHolder.iv_icon);
 
@@ -230,16 +255,19 @@ public class TabDetailPager extends MenuDetaiBasePager {
 
     private void getDataFromNet() {
         RequestParams params = new RequestParams(url);
+        params.setConnectTimeout(4000);
         x.http().get(params, new Callback.CommonCallback<String>() {
             @Override
             public void onSuccess(String result) {
                 CacheUtils.putString(context,url,result);
                 processData(result);
+                listView.onRefreshFinish(true);
             }
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
                 Log.e("onError",ex.getMessage());
+                listView.onRefreshFinish(false);
             }
 
             @Override
@@ -257,16 +285,62 @@ public class TabDetailPager extends MenuDetaiBasePager {
     @Override
     public View initView() {
         View view = View.inflate(context, R.layout.tabdetail_pager,null);
-        listView = (ListView) view.findViewById(R.id.listview);
+        listView = (RefreshListView) view.findViewById(R.id.listview);
+        listView.setOnRefreshListener(new RefreshListView.onRefreshListener() {
+            @Override
+            public void onPullDownRefresh() {
+                getDataFromNet();
+            }
+
+            @Override
+            public void onLoadMore() {
+                if(TextUtils.isEmpty(moreUrl)){
+                    Toast.makeText(context, "没有更多数据...", Toast.LENGTH_SHORT).show();
+                    listView.onRefreshFinish(false);
+                }else{
+                    getMoreDataFromNet();
+                }
+
+            }
+        });
 
         View topNewsView = View.inflate(context,R.layout.topnews,null);
         ll_point_group = (LinearLayout) topNewsView.findViewById(R.id.ll_point_group);
-        viewPager = (ViewPager) topNewsView.findViewById(R.id.viewpager);
+        viewPager = (HorizontalScrollViewPager) topNewsView.findViewById(R.id.viewpager);
         iv_title = (TextView) topNewsView.findViewById(R.id.tv_title);
 
 
-        listView.addHeaderView(topNewsView);
+//        listView.addHeaderView(topNewsView);
 
+        listView.addTopNewsView(topNewsView);
         return view;
+    }
+
+    private void getMoreDataFromNet() {
+        RequestParams params = new RequestParams(moreUrl);
+        params.setConnectTimeout(4000);
+        x.http().get(params, new Callback.CommonCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                isLoadMore = true;
+                processData(result);
+                listView.onRefreshFinish(false);
+            }
+
+            @Override
+            public void onError(Throwable ex, boolean isOnCallback) {
+                listView.onRefreshFinish(false);
+            }
+
+            @Override
+            public void onCancelled(CancelledException cex) {
+
+            }
+
+            @Override
+            public void onFinished() {
+
+            }
+        });
     }
 }
