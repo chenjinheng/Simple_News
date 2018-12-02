@@ -79,12 +79,13 @@ public class NewsPager extends BasePager {
             @Override
             public void onSuccess(String result) {
                 processData(result);
+                Log.e("onError", result);
                 CacheUtils.putString(context,Constants.news_center_url,result);
             }
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
-
+                Log.e("onError", "AAA"+ ex.getMessage());
             }
 
             @Override
