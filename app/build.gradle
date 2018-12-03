@@ -33,4 +33,5 @@ dependencies {
     compile project(':xutils')
     compile project(':indicator_library')
     compile project(':refreshlistview')
+    compile files('libs/volley.jar')
 }

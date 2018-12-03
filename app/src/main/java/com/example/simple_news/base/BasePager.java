@@ -14,6 +14,8 @@ import com.example.simple_news.activity.MainActivity;
  */
 
 public class BasePager {
+    public ImageButton ib_switch_list_grid;
+
     public Context context;
     public View viewRoot;
 
@@ -33,6 +35,7 @@ public class BasePager {
         tv_title = (TextView) view.findViewById(R.id.tv_title);
         ib_menu = (ImageButton) view.findViewById(R.id.ib_menu);
         fl_content = (FrameLayout) view.findViewById(R.id.fl_content);
+        ib_switch_list_grid = (ImageButton) view.findViewById(R.id.ib_switch_list_grid);
 
         ib_menu.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -21,8 +21,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.Request;
 import com.example.refreshlistview.RefreshListView;
 import com.example.simple_news.R;
 import com.example.simple_news.activity.NewsDetailActivity;
@@ -41,6 +49,7 @@ import org.xutils.http.RequestParams;
 import org.xutils.image.ImageOptions;
 import org.xutils.x;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.List;
 
@@ -93,8 +102,11 @@ public class TabDetailPager extends MenuDetaiBasePager {
         if(!TextUtils.isEmpty(saveJson)){
             processData(saveJson);
         }
-        getDataFromNet();
+//        getDataFromNet();
+        getDataFromNetByVolley();
     }
+
+
 
     private void processData(String saveJson) {
         TabDetailBean tabDetailBean = parsedJson(saveJson);
@@ -255,9 +267,27 @@ public class TabDetailPager extends MenuDetaiBasePager {
 
         }
 
+        private boolean isDragging = false;
         @Override
         public void onPageScrollStateChanged(int state) {
+            if(state == viewPager.SCROLL_STATE_DRAGGING){//拖拽
 
+                isDragging = true;
+                internalHanlder.removeCallbacksAndMessages(null);
+
+            }else if(state == viewPager.SCROLL_STATE_SETTLING){//惯性
+
+                isDragging = false;
+                internalHanlder.removeCallbacksAndMessages(null);
+                internalHanlder.postDelayed(new MyRunnable(),4000);
+
+            }else if(state == viewPager.SCROLL_STATE_IDLE){//静止
+
+                isDragging = false;
+                internalHanlder.removeCallbacksAndMessages(null);
+                internalHanlder.postDelayed(new MyRunnable(),4000);
+
+            }
         }
     }
 
@@ -293,6 +323,10 @@ public class TabDetailPager extends MenuDetaiBasePager {
                             internalHanlder.removeCallbacksAndMessages(null);
                             internalHanlder.postDelayed(new MyRunnable(),4000);
                             break;
+//                        case MotionEvent.ACTION_CANCEL:
+//                            internalHanlder.removeCallbacksAndMessages(null);
+//                            internalHanlder.postDelayed(new MyRunnable(),4000);
+//                            break;
                     }
                     return true;
                 }
@@ -308,6 +342,35 @@ public class TabDetailPager extends MenuDetaiBasePager {
 
     private TabDetailBean parsedJson(String saveJson) {
         return new Gson().fromJson(saveJson,TabDetailBean.class);
+    }
+
+    private void getDataFromNetByVolley() {
+        RequestQueue queue = Volley.newRequestQueue(context);
+        StringRequest request = new StringRequest(com.android.volley.Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String result) {
+                CacheUtils.putString(context,url,result);
+                processData(result);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        }){
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    String parsed = new String(response.data, "UTF-8");
+                    return Response.success(parsed,HttpHeaderParser.parseCacheHeaders(response));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                return super.parseNetworkResponse(response);
+            }
+        };
+
+        queue.add(request);
     }
 
     private void getDataFromNet() {

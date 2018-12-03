@@ -111,8 +111,8 @@ public class NewsPager extends BasePager {
         detaiBasePagers = new ArrayList<>();
 
         detaiBasePagers.add(new NewsMenuDetailPager(context,data.get(0)));
-        detaiBasePagers.add(new TopicMenuDetailPager((context)));
-        detaiBasePagers.add(new PhotosMenuDetailPager(context));
+        detaiBasePagers.add(new TopicMenuDetailPager(context,data.get(0)));
+        detaiBasePagers.add(new PhotosMenuDetailPager(context,data.get(2)));
         detaiBasePagers.add(new interacMenuDetailPager(context));
 
         leftmenuFragment.setData(data);
@@ -135,6 +135,12 @@ public class NewsPager extends BasePager {
         View rootView = menuDetaiBasePager.rootView;
         fl_content.addView(rootView);
         menuDetaiBasePager.initData();
+
+        if(position == 2){
+            ib_switch_list_grid.setVisibility(View.VISIBLE);
+        }else{
+            ib_switch_list_grid.setVisibility(View.GONE);
+        }
 
     }
 }

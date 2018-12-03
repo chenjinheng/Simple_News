@@ -64,6 +64,7 @@ public class LeftmenuFragment extends BaseFragment {
         ContentFragment contentFragment = mainActivity.getContentFragment();
         NewsPager newsPager = contentFragment.getNewsPager();
         newsPager.swichPager(position);
+
     }
 
     @Override

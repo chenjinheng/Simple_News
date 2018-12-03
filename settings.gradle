@@ -1,2 +1,2 @@
-include ':app', ':SlidingMenu_library', ':sample', ':xutils', ':refreshlistview'
+include ':app', ':SlidingMenu_library', ':sample', ':xutils', ':refreshlistview', ':volley-master'
 include ':indicator_library'
