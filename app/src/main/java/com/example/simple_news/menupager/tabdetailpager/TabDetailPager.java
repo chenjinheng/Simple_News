@@ -3,11 +3,14 @@ package com.example.simple_news.menupager.tabdetailpager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -53,6 +56,8 @@ public class TabDetailPager extends MenuDetaiBasePager {
     private RefreshListView listView;
     private MyTabDetailListAdapter adapter;
     private ImageOptions imageOptions;
+
+    private InternalHanlder internalHanlder;
 
     private String moreUrl;
 
@@ -139,8 +144,33 @@ public class TabDetailPager extends MenuDetaiBasePager {
             adapter.notifyDataSetChanged();
         }
 
+        if(internalHanlder == null){
+            internalHanlder = new InternalHanlder();
+        }
+
+        internalHanlder.removeCallbacksAndMessages(null);
+        internalHanlder.postDelayed(new MyRunnable(),4000);
 
     }
+
+    class MyRunnable implements Runnable{
+
+        @Override
+        public void run() {
+            internalHanlder.sendEmptyMessage(0);
+        }
+    }
+
+    class InternalHanlder extends Handler{
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            int item = (viewPager.getCurrentItem() + 1) % topnews.size();
+            viewPager.setCurrentItem(item);
+            internalHanlder.postDelayed(new MyRunnable(),4000);
+        }
+    }
+
     class MyTabDetailListAdapter extends BaseAdapter{
 
         @Override
@@ -252,6 +282,21 @@ public class TabDetailPager extends MenuDetaiBasePager {
             TabDetailBean.DataBean.NewsBean topnewsData = topnews.get(position);
             String imageUrl = Constants.Net + topnewsData.getListimage();
             x.image().bind(imageView,imageUrl);
+            imageView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch (event.getAction()){
+                        case MotionEvent.ACTION_DOWN:
+                            internalHanlder.removeCallbacksAndMessages(null);
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            internalHanlder.removeCallbacksAndMessages(null);
+                            internalHanlder.postDelayed(new MyRunnable(),4000);
+                            break;
+                    }
+                    return true;
+                }
+            });
             return imageView;
         }
 
@@ -346,6 +391,8 @@ public class TabDetailPager extends MenuDetaiBasePager {
         });
         return view;
     }
+
+
 
     private void getMoreDataFromNet() {
         RequestParams params = new RequestParams(moreUrl);

@@ -1,9 +1,13 @@
 package com.example.simple_news.activity;
 
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -22,6 +26,7 @@ public class NewsDetailActivity extends AppCompatActivity implements View.OnClic
     private WebView webView;
     private ProgressBar progressBar;
     private String url;
+    private WebSettings webSettings;
 
     /**
      * Find the Views in the layout<br />
@@ -58,10 +63,53 @@ public class NewsDetailActivity extends AppCompatActivity implements View.OnClic
              finish();
         } else if ( v == ibTestsize ) {
             // Handle clicks for ibTestsize
-             Toast.makeText(this, "点击", Toast.LENGTH_SHORT).show();
+             showChangeTextSizeDialog();
         } else if ( v == ibShare ) {
             // Handle clicks for ibShare
              Toast.makeText(this, "点击", Toast.LENGTH_SHORT).show();
+        }
+    }
+    private int tempSize = 2;
+    private int realSize = tempSize;
+
+    private void showChangeTextSizeDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("设置文字大小");
+        String [] items = {"超大字体","大字体","正常字体","小字体","超小字体"};
+        builder.setSingleChoiceItems(items, 2, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                tempSize = which;
+            }
+        });
+        builder.setNegativeButton("取消",null);
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                realSize = tempSize;
+                changeTextSize(realSize);
+            }
+        });
+        builder.show();
+    }
+
+    private void changeTextSize(int realSize) {
+        switch (realSize){
+            case 0:
+                webSettings.setTextZoom(200);
+                break;
+            case 1:
+                webSettings.setTextZoom(150);
+                break;
+            case 2:
+                webSettings.setTextZoom(100);
+                break;
+            case 3:
+                webSettings.setTextZoom(75);
+                break;
+            case 4:
+                webSettings.setTextZoom(50);
+                break;
         }
     }
 
@@ -77,6 +125,17 @@ public class NewsDetailActivity extends AppCompatActivity implements View.OnClic
     private void getData() {
        url = getIntent().getStringExtra("url");
         webView.loadUrl(url);
-        webView.getSettings();
+        webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setBuiltInZoomControls(true);
+        webView.setWebViewClient(new WebViewClient(){
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                progressBar.setVisibility(View.GONE);
+
+            }
+        });
     }
 }
