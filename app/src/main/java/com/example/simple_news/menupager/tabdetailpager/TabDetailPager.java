@@ -1,6 +1,7 @@
 package com.example.simple_news.menupager.tabdetailpager;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -18,7 +20,9 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.example.refreshlistview.RefreshListView;
 import com.example.simple_news.R;
+import com.example.simple_news.activity.NewsDetailActivity;
 import com.example.simple_news.base.MenuDetaiBasePager;
 import com.example.simple_news.domain.NewsBean;
 import com.example.simple_news.domain.TabDetailBean;
@@ -26,7 +30,7 @@ import com.example.simple_news.utils.CacheUtils;
 import com.example.simple_news.utils.Constants;
 import com.example.simple_news.utils.DensityUtil;
 import com.example.simple_news.view.HorizontalScrollViewPager;
-import com.example.simple_news.view.RefreshListView;
+
 import com.google.gson.Gson;
 
 import org.xutils.common.Callback;
@@ -42,6 +46,7 @@ import java.util.List;
  */
 
 public class TabDetailPager extends MenuDetaiBasePager {
+    public static final String READ_ARRAY_ID = "read_array_id";
     private HorizontalScrollViewPager viewPager;
     private TextView iv_title;
     private LinearLayout ll_point_group;
@@ -185,6 +190,13 @@ public class TabDetailPager extends MenuDetaiBasePager {
             viewHolder.tv_title.setText(newsBean.getTitle());
             viewHolder.tv_time.setText(newsBean.getPubdate());
 
+            String idArray = CacheUtils.getString(context,READ_ARRAY_ID);
+            if(idArray.contains(newsBean.getId() + "")){
+                viewHolder.tv_title.setTextColor(Color.GRAY);
+            }else{
+                viewHolder.tv_title.setTextColor(Color.BLACK);
+            }
+
             return convertView;
         }
     }
@@ -313,6 +325,25 @@ public class TabDetailPager extends MenuDetaiBasePager {
 //        listView.addHeaderView(topNewsView);
 
         listView.addTopNewsView(topNewsView);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int realPosition = position - 1;
+                TabDetailBean.DataBean.NewsBean newsBean = news.get(realPosition);
+
+                String idArray = CacheUtils.getString(context, READ_ARRAY_ID);
+
+                if(!idArray.contains(newsBean.getId() + "")){
+                    CacheUtils.putString(context,READ_ARRAY_ID,idArray + newsBean.getId() + ",");
+                    adapter.notifyDataSetChanged(); //调用此方法，会调用适配器的getCount()和getView()方法进行界面刷新
+                }
+
+                Intent intent = new Intent(context,NewsDetailActivity.class);
+                intent.putExtra("url",Constants.Net + newsBean.getUrl());
+                context.startActivity(intent);
+            }
+        });
         return view;
     }
 

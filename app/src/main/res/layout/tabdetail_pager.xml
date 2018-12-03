@@ -37,8 +37,8 @@
         <!--</RelativeLayout>-->
     <!--</RelativeLayout>-->
 
-    <com.example.simple_news.view.RefreshListView
+    <com.example.refreshlistview.RefreshListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/listview"></com.example.simple_news.view.RefreshListView>
+        android:id="@+id/listview"></com.example.refreshlistview.RefreshListView>
 </LinearLayout>

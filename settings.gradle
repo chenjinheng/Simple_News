@@ -1,2 +1,2 @@
-include ':app', ':SlidingMenu_library', ':sample', ':xutils'
+include ':app', ':SlidingMenu_library', ':sample', ':xutils', ':refreshlistview'
 include ':indicator_library'
