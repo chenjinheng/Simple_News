@@ -113,7 +113,7 @@ public class NewsPager extends BasePager {
         detaiBasePagers.add(new NewsMenuDetailPager(context,data.get(0)));
         detaiBasePagers.add(new TopicMenuDetailPager(context,data.get(0)));
         detaiBasePagers.add(new PhotosMenuDetailPager(context,data.get(2)));
-        detaiBasePagers.add(new interacMenuDetailPager(context));
+        detaiBasePagers.add(new interacMenuDetailPager(context,data.get(2)));
 
         leftmenuFragment.setData(data);
 

@@ -10,7 +10,7 @@ public class Constants {
 
     public static final String LOCAL_BASE_URL = "http://10.0.2.2:8080/web_home";
 
-    public static final String Net = "http://192.168.1.101:8080/web_home";
+    public static final String Net = "http://192.168.43.67:8080/web_home";
 
     //http://192.168.1.101:8080/web_home/static/api/news/categories.json
 
